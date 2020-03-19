@@ -1,8 +1,12 @@
 <h1 align="center">Xenon</h1>
 
 <p align="center">
-<img alt="Discord" src="https://img.shields.io/discord/678966940743761990?color=7289da&style=flat-square">
-<img alt="GitHub" src="https://img.shields.io/github/license/xenon-kernel/xenon?style=flat-square">
+	<a href="https://discord.gg/t4C349U">
+		<img alt="Discord" src="https://img.shields.io/discord/678966940743761990?color=7289da&style=flat-square">
+	</a>
+	<a href="https://www.gnu.org/licenses/gpl-3.0.en.html">
+		<img alt="GitHub" src="https://img.shields.io/github/license/xenon-kernel/xenon?style=flat-square">
+	</a>
 </p>
 
 Xenon aims to be a lightweight, secure, cross-architecture, monolithic kernel written in C++
@@ -16,7 +20,7 @@ Xenon aims to be a lightweight, secure, cross-architecture, monolithic kernel wr
 
 ## Building
 ### Linux
-To build Xenon, you will need to have ```cmake```, ```make```, ```grub```, and a working C++ compiler (like clang or gcc) installed on your system.<br>
+To build Xenon, you will need to have ```cmake```, ```make```, ```grub```, and a working C++ compiler (we recommend ```clang```) installed on your system.<br>
 Xenon can be built by either running the ```build.sh``` script in the project root, or building it manually by running
 ```
 mkdir build
@@ -38,3 +42,6 @@ Simply run the ```run.sh``` script, or execute ```make qemu``` in the ```build``
 
 <b>VirtualBox / VMWare</b><br>
 Xenon can be run like any other virtual machine by selecting the ```Other (64-bit)``` operating system when prompted, and inserting ```xenon.iso```
+
+## Support
+You can get support by joining our [Discord Server](https://discord.gg/t4C349U)
