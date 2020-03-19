@@ -1,13 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 project(xenon)
 
+set(arch "x86_64")
+
 enable_language(ASM)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 set(LINKER_SCRIPT "${CMAKE_SOURCE_DIR}/arch/linker.ld")
 
-set(CMAKE_EXE_LINKER_FLAGS "-nostdlib -no-pie -Wl,--build-id=none -Wl,-z,max-page-size=0x1000,-n,-T,${LINKER_SCRIPT}")
+set(CMAKE_LINKER "ld")
+set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>")
+set(CMAKE_EXE_LINKER_FLAGS "-nostdlib -no-pie --build-id=none -zmax-page-size=0x1000 -n -T${LINKER_SCRIPT}")
 set(CMAKE_ASM_FLAGS "-m64")
 set(CMAKE_CXX_FLAGS " \
 	-std=c++17 -Wall \
@@ -15,6 +19,12 @@ set(CMAKE_CXX_FLAGS " \
 	-m64 -march=native -fno-PIC -pedantic -W -Wall -ffreestanding -mno-red-zone -mcmodel=kernel \
 	-mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-3dnow -mno-avx -mno-avx2 \
 ")
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -target ${arch}-elf")
+else()
+	message(WARNING "Using a non-cross compiler isn't recommended! Here be monsters!")
+endif()
 
 # Include the current and include/ directory globally
 include_directories(.)
