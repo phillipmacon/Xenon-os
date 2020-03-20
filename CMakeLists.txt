@@ -14,10 +14,10 @@ set(CMAKE_CXX_LINK_EXECUTABLE "<CMAKE_LINKER> <LINK_FLAGS> <OBJECTS> -o <TARGET>
 set(CMAKE_EXE_LINKER_FLAGS "-nostdlib -no-pie --build-id=none -zmax-page-size=0x1000 -n -T${LINKER_SCRIPT}")
 set(CMAKE_ASM_FLAGS "-m64")
 set(CMAKE_CXX_FLAGS " \
-	-std=c++17 -Wall \
+	-std=c++17 -Wall -O3 \
 	-fno-exceptions -fno-rtti -fuse-cxa-atexit -fno-threadsafe-statics \
 	-m64 -march=native -fno-PIC -pedantic -W -Wall -ffreestanding -mno-red-zone -mcmodel=kernel \
-	-mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-3dnow -mno-avx -mno-avx2 \
+	-mno-mmx -mno-sse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-sse4 -mno-sse4a -mno-3dnow -mno-avx -mno-avx2 \
 ")
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
