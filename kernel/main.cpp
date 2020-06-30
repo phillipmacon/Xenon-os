@@ -19,5 +19,18 @@ extern "C" void kmain(const char* multiboot_structure, u32 multiboot_magic)
     puts("__--== !              Hello from the cool zone               ! ==--__\n");
     puts("__--== ! We are running on the shiny new x86_64 architecture ! ==--__\n");
 
-    while(1) { asm volatile("hlt"); }
+    // Reading from a serial port always returns the last character it remembers
+    // This ugly setup is just for testing io ports
+    u8 last_input{};
+    while(1) {
+        u8 input = io::in8(0x3f8);
+        if(input != last_input) {
+            puts("Received character from COM0: ");
+            io::out8(0x3f8, input);
+            puts("\n");
+            last_input = input;
+        }
+    }
+
+    // while(1) { asm volatile("hlt"); }
 }
