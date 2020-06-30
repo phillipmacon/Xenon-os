@@ -53,7 +53,7 @@ add_custom_target(xenon.iso DEPENDS xenon.elf
     COMMAND echo    '  multiboot2 /boot/xenon.elf'  >> iso/boot/grub/grub.cfg
     COMMAND echo    '  boot'                        >> iso/boot/grub/grub.cfg
     COMMAND echo    '}'                             >> iso/boot/grub/grub.cfg
-    COMMAND grub-mkrescue --output=xenon.iso iso 	2> /dev/null
+    COMMAND grub2-mkrescue --output=xenon.iso iso 	2> /dev/null
     COMMAND rm -rf iso
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 )
