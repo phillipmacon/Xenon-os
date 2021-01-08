@@ -11,6 +11,7 @@ SECTIONS {
 	_start = .;
 	.text : AT(ADDR(.text) - KERNEL_VMA) {
 		_code = .;
+		*(.multiboot)
 		*(.boot)
 		*(.text*)
 		*(.gnu.linkonce.t*)
