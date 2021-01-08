@@ -18,8 +18,8 @@ __multiboot_header_start:
     .short MB2_HEADER_TAG_FRAMEBUFFER
     .short MB2_HEADER_TAG_OPTIONAL
     .long 20
-    .long 1920 # width
-    .long 1080 # height    
+    .long 0 # width
+    .long 0 # height    
     .long 32 # depth
 
 .align 8
