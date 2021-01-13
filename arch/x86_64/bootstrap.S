@@ -2,20 +2,20 @@
 
 .set KERNEL_VMA, 0xffffffff80000000
 .extern kmain
-.global bootstrap, init_pml4, init_pdp, init_pd
+.global bootstrap, init_ptl4, init_ptl3, init_ptl2
 
 .code32
 .section .boot
 bootstrap:
-	# Save multiboot info for later
-    pushl %eax
-    pushl %ebx
-
 	# Disable interrupts
 	cli
 
 	# Load the GDT table
 	lgdt (init_gdt64_ptr - KERNEL_VMA)
+
+	# Save multiboot info for later
+	mov %eax, %esi
+	mov %ebx, %edi
 
 	# Set the stack pointer to our stack
 	movl $(kstack_top - KERNEL_VMA), %esp
@@ -35,7 +35,7 @@ bootstrap:
 	movl %eax, %cr4
 
 	# Load the paging directory
-	movl $(init_pml4 - KERNEL_VMA), %eax
+	movl $(init_ptl4 - KERNEL_VMA), %eax
 	movl %eax, %cr3
 
 	# Enable long mode
@@ -74,18 +74,20 @@ init_gdt64_ptr:
 	.long gdt64 - KERNEL_VMA
 
 .align 0x1000
-init_pml4:
-	.quad init_pdp - KERNEL_VMA + 3
+init_ptl4:
+	.quad init_ptl3 - KERNEL_VMA + 3
 	.fill 510,8,0
-	.quad init_pdp - KERNEL_VMA + 3
+	.quad init_ptl3 - KERNEL_VMA + 3
 
-init_pdp:
-	.quad init_pd - KERNEL_VMA + 3
+.align 0x1000
+init_ptl3:
+	.quad init_ptl2 - KERNEL_VMA + 3
 	.fill 509,8,0
-	.quad init_pd - KERNEL_VMA + 3
+	.quad init_ptl2 - KERNEL_VMA + 3
 	.fill 1,8,0
 
-init_pd:
+.align 0x1000
+init_ptl2:
 	.quad 0x0000000000000083 # 0MB - 2MB
 	.quad 0x0000000000200083 # 2MB - 4MB
 	.fill 510,8,0
