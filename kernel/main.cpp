@@ -1,3 +1,4 @@
+#include <cpu/cpuinfo.h>
 #include <print.h>
 #include <types.h>
 
@@ -9,6 +10,8 @@ extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
     }
 
     puts("Initialising kernel\n");
+    
+    cpu::info::printProcessorInfo();
 
     while(1) { __asm("hlt"); }
 }
