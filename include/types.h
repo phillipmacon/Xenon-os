@@ -4,6 +4,7 @@ typedef unsigned short u16;
 typedef unsigned int u32;
 typedef unsigned long u64;
 
+typedef u64 size_t;
 typedef u64 addr;
 
 static_assert(sizeof(u32) == 4, "Xenon only supports 64-bit systems/compilers");

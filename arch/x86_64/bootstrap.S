@@ -61,6 +61,9 @@ _stop:
     hlt
     jmp _stop
 
+# This hardcoded page table *will* become a problem later on.
+# Easiest is to map the first 50-100 pages (100-200MB)
+# Nothing else is done with this table anyways. When the kernel sets up memory this table will not be used again
 .section .data
 .align 0x10
 gdt64:
