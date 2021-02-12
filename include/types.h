@@ -1,11 +1,11 @@
 #pragma once
-typedef unsigned char u8;
-typedef unsigned short u16;
-typedef unsigned int u32;
-typedef unsigned long u64;
+using u8  = unsigned char;
+using u16 = unsigned short;
+using u32 = unsigned int;
+using u64 = unsigned long long;
 
-typedef u64 size_t;
-typedef u64 addr;
+using size_t = u64;
+using addr = u64;
 
 static_assert(sizeof(u32) == 4, "Xenon only supports 64-bit systems/compilers");
 static_assert(sizeof(u64) == 8, "Xenon only supports 64-bit systems/compilers");

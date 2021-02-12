@@ -50,9 +50,13 @@ bootstrap:
 	movl %eax, %cr0
 
 	# Jump to 64-bit code
-	ljmp $0x8, $(boot64 - KERNEL_VMA)
+	ljmp $0x8, $(boot64_trampoline - KERNEL_VMA)
 
 .code64
+boot64_trampoline:
+	mov $boot64, %rax
+	jmp *%rax
+
 boot64:
 	call kmain
 
@@ -78,15 +82,15 @@ init_gdt64_ptr:
 
 .align 0x1000
 init_ptl4:
-	.quad init_ptl3 - KERNEL_VMA + 3
+	.quad init_ptl3 - KERNEL_VMA + 0b11
 	.fill 510,8,0
-	.quad init_ptl3 - KERNEL_VMA + 3
+	.quad init_ptl3 - KERNEL_VMA + 0b11
 
 .align 0x1000
 init_ptl3:
-	.quad init_ptl2 - KERNEL_VMA + 3
+	.quad init_ptl2 - KERNEL_VMA + 0b11
 	.fill 509,8,0
-	.quad init_ptl2 - KERNEL_VMA + 3
+	.quad init_ptl2 - KERNEL_VMA + 0b11
 	.fill 1,8,0
 
 .align 0x1000
