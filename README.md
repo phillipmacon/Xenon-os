@@ -23,14 +23,15 @@ Xenon aims to be a lightweight, secure, cross-architecture, monolithic kernel wr
 
 ## Building
 ### Linux
-To build Xenon, you will need to have `cmake`, `make`, `grub2`, `xorriso`, and a working C++ compiler (we recommend `clang`) installed on your system.<br>
-Xenon can be built by either running the `build.sh` script in the project root, or building it manually by running
+To build Xenon, you will need to have `meson`, `ninja`, `grub2`, `xorriso`, and `clang` installed on your system.<br>
+Xenon can be built by running the `build.sh` script in the project root, resulting in a bootable ISO file in the `build` directory 
+
+Xenon can also be manually built by running
 ```
-mkdir build && cd build
-cmake ..
-make -j xenon.iso
+meson build --cross-file=arch/x86_64.ini && cd build
+ninja
 ```
-After building, the resulting disk image will be located in the `build` directory
+Do note however that this only produces an ELF, not an ISO
 
 ### Windows
 Xenon can be built on Windows 10 by using WSL and following the <b>Linux</b> guide.
