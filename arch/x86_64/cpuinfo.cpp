@@ -25,12 +25,7 @@ namespace cpu::info {
         getProcessorModel(processorModel);
         getProcessorVendor(processorVendor);
 
-        puts("[ cpu::info ] CPU Vendor: ");
-        puts(processorVendor);
-        puts("\n");
-
-        puts("[ cpu::info ] CPU Model: ");
-        puts(processorModel);
-        puts("\n");
+        printk("[ cpu::info ] CPU Vendor: %s\n", processorVendor);
+        printk("[ cpu::info ] CPU Model: %s\n", processorModel);
     }
 }

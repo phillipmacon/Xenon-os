@@ -9,12 +9,12 @@
 extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
 {
     if(multiboot_magic != 0x36d76289) {
-        puts("Multiboot magic invalid! Halting.\n");
+        printk("Multiboot magic invalid! Halting.\n");
         while(1) { __asm("hlt"); }
     }
 
-    puts("Initialising kernel\n");
-    
+    printk("Initialising kernel\n");
+
     cpu::info::printProcessorInfo();
 
     // Leave memory size at 0 until we start using UEFI
@@ -28,9 +28,7 @@ extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
     u32 fbWidth, fbHeight, fbPitch;
     u32 type = *(u32*)mb;
     while(type != 0) {
-        puts("Found tag: ");
-        putx(type);
-        puts("\n");
+        printk("Found tag: 0x%x\n", type);
 
         if(type == 8) {
             u32* mbSave = mb + 2;
@@ -48,13 +46,11 @@ extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
     }
 
     if(fbAddr == 0) {
-        puts("Framebuffer not found! Halting.\n");
+        printk("Framebuffer not found! Halting.\n");
         while(1) { __asm("hlt"); }
     }
 
-    puts("Found fbaddr 0x");
-    putx(fbAddr);
-    puts("\n");
+    printk("Found fbaddr 0x%x\n", fbAddr);
 
     // Called "Crap" for a reason
     addr fbVAddr = cpu::paging::mapPagesCrap(fbAddr, fbHeight * fbPitch, 0, 0, 1, 0);

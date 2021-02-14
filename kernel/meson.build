@@ -3,4 +3,5 @@ kernel_sources += files(
     'mem/pmm.cpp',
 
     'main.cpp',
+    'printk.cpp',
 )
