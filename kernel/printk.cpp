@@ -109,6 +109,6 @@ void printk(const char* fmt, ...) {
     va_list args;
 
     va_start(args, fmt);
-    printklImpl(LogLevel::None, fmt, args);
+    printklImpl(LogLevel::Debug, fmt, args);
     va_end(args);
 }

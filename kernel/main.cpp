@@ -17,7 +17,6 @@ extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
 
     cpu::info::printProcessorInfo();
 
-    // Leave memory size at 0 until we start using UEFI
     mem::physmem::initialise(0);
 
     // Find the framebuffer tag
