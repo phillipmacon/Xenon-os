@@ -97,7 +97,8 @@ init_ptl3:
 init_ptl2:
 	.quad 0x0000000000000083 # 0MB - 2MB
 	.quad 0x0000000000200083 # 2MB - 4MB
-	.fill 510,8,0
+	.quad 0x0000000000400083 # 4MB - 8MB
+	.fill 509,8,0
 
 .section .bss
 .align 0x20

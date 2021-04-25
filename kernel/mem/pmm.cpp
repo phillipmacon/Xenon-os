@@ -7,6 +7,11 @@ namespace util {
         bits[index / 64] |= (1 << (index % 64));
     }
 
+    void Bitmap::set(size_t index, size_t count) {
+        for(size_t i = 0; i < count; i++)
+            set(index+i);
+    }
+
     void Bitmap::unset(size_t index) {
         bits[index / 64] &= ~(1 << (index % 64));
     }
@@ -14,18 +19,44 @@ namespace util {
     u8 Bitmap::get(size_t index) {
         return bits[index / 64] & (1 << (index % 64));
     }
+    
+    void Bitmap::resize(size_t size) {
+        data_size = size;
+    }
 
-    u64 Bitmap::getNextZero() {
+    void Bitmap::clear() {
+        memset(bits, 0, data_size * 8);
+    }
+
+    size_t Bitmap::getBlock(size_t count) {
+       size_t count2 = count;
+
+        for(int i = 0; i < bitcount(); i++) {
+            if(get(i) == 0) {
+                if(--count2 == 0) {
+                    return i - count;
+                } else {
+                    count2 = count;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    size_t Bitmap::getNextZero() {
         for(size_t i = 0; i < data_size; i++) {
             // Skip block if the entire block is taken
             if(bits[i] == ~0ULL) continue;
 
             // Iterate through block
             for(size_t ib = 0; ib < 64; ib++) {
-                if(get(data_size * 64 + ib) == 0)
-                    return data_size * 64 + ib;
+                if(get(i * 64 + ib) == 0)
+                    return i * 64 + ib;
             }
         }
+
+        return -1;
     }
 }
 
@@ -33,14 +64,37 @@ namespace util {
 extern addr _start;
 extern addr _end;
 
+static util::Bitmap bitmap(&_end, 0);
+
 namespace mem::physmem {
     void initialise(u64 memSize) {
         cpu::paging::initialisePageTable();
+        
+        bitmap.resize(memSize / constants::pageSize / 64 + 1);
+        bitmap.clear();
 
-        // add kernel code to page table
-        // FIXME: replace this with something that's actually good and doesn't look like it came directly out of satan's asshole
-        cpu::paging::mapPagesCrap(0, &_end - &_start, 0, 0, 0, 0);
+        bitmap.set(0, 512 * 3);
+        printk("Bitmap size in u64s: %i\n", memSize / constants::pageSize / 64 + 1);
+    }
 
-        cpu::paging::loadPageTable();
+    static void* alloc(size_t pages) {
+        // TODO: Spinlocks
+        size_t page_base = bitmap.getBlock(pages);
+        if(page_base == -1) {
+            // TODO: Panic instead of potentially letting the kernel collapse
+            return nullptr;
+        }
+
+        bitmap.set(page_base, pages);
+        return reinterpret_cast<void*>(page_base * constants::pageSize);
+    }
+
+    void* allocz(size_t pages) {
+        void* p = alloc(pages);
+        if(!p)
+            return nullptr;
+
+        util::memset(p, 0, pages * constants::pageSize);
+        return p;
     }
 }
