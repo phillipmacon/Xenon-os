@@ -67,14 +67,14 @@ extern addr _end;
 static util::Bitmap bitmap(&_end, 0);
 
 namespace mem::physmem {
-    void initialise(u64 memSize) {
+    void initialise(u64 memsize) {
         cpu::paging::initialisePageTable();
         
-        bitmap.resize(memSize / constants::pageSize / 64 + 1);
+        bitmap.resize(memsize / constants::pageSize / 64 + 1);
         bitmap.clear();
 
-        bitmap.set(0, 512 * 3);
-        printk("Bitmap size in u64s: %i\n", memSize / constants::pageSize / 64 + 1);
+        // bitmap.set(0, 512 * 3);
+        printk("Bitmap size in u64s: %i\n", memsize / constants::pageSize / 64 + 1);
     }
 
     static void* alloc(size_t pages) {

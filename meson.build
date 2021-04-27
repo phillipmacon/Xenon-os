@@ -11,16 +11,22 @@ project(
 )
 
 kernel_sources = []
-inc = include_directories('include', '.')
+inc = include_directories('include', '.', 'external')
 
 architecture = meson.get_cross_property('architecture')
 
 subdir('arch/' + architecture)
 subdir('kernel')
 
-kernel_bin = executable('xenon.elf',
+kernel_lib = static_library('kernel',
     kernel_sources,
     include_directories: inc,
     link_args : [ '-T' + meson.current_source_dir()/'arch/linker.ld' ],
-    link_with: [arch_lib]
+)
+
+xenon_bin = executable('xenon.elf',
+    boot_sources,
+    include_directories: inc,
+    link_args : [ '-T' + meson.current_source_dir()/'arch/linker.ld' ],
+    link_with: [arch_lib, kernel_lib]
 )

@@ -7,8 +7,9 @@ arch_lib = static_library('arch',
         'mem/paging.h',
 
         'cpuinfo.cpp',
-        'bootstrap.S',
-        'multiboot.S',
+        'stivale.cpp',
     ),
     include_directories: inc
 )
+
+boot_sources = files('stivale.cpp')

@@ -15,18 +15,41 @@ pushd build
         exit -1
     fi
 
-    # Build the ISO using grub-mkrescue or grub2-mkrescue (can't wait to get rid of this)
     echo -e "${GREEN}Building ISO${RESET}"
-    mkdir   -p iso/boot/grub
-    cp      xenon.elf ./iso/boot/xenon.elf
-    echo    'set timeout=0'                 > iso/boot/grub/grub.cfg
-    echo    'set default=0'                 >> iso/boot/grub/grub.cfg
-    echo    'menuentry \"xenon\" {'         >> iso/boot/grub/grub.cfg
-    echo    '  multiboot2 /boot/xenon.elf'  >> iso/boot/grub/grub.cfg
-    echo    '  boot'                        >> iso/boot/grub/grub.cfg
-    echo    '}'                             >> iso/boot/grub/grub.cfg
-    grub-mkrescue --output=xenon.iso iso   2> /dev/null
-    rm -rf iso
+    mkdir   -p iso_master/boot
+    mkdir   -p iso_master/EFI/BOOT
+
+    cp xenon.elf                                        ./iso_master/boot/xenon.elf
+    cp ../external/limine-bin/limine.sys                ./iso_master/boot/limine.sys
+    cp ../external/limine-bin/limine-cd.bin             ./iso_master/boot/limine-cd.bin
+    cp ../external/limine-bin/limine-eltorito-efi.bin   ./iso_master/boot/limine-efi.bin
+    cp ../external/limine-bin/BOOTX64.EFI               ./iso_master/EFI/BOOT/BOOTX64.EFI
+
+    cat >iso_master/boot/limine.cfg <<EOL
+:xenon
+TIMEOUT=5
+PROTOCOL=stivale2
+KERNEL_PATH=boot:///boot/xenon.elf
+EOL
+
+    xorriso -as mkisofs -b boot/limine-cd.bin \
+            -no-emul-boot -boot-load-size 4 -boot-info-table \
+            -eltorito-alt-boot -e boot/limine-efi.bin \
+            -no-emul-boot iso_master -o xenon.iso
+
+    # xorriso -as mkisofs                                     \
+    #     -J -joliet-long                                     \
+    #     -rock                                               \
+    #     -b boot/limine-cd.bin                               \
+    #     -c boot/limine-cd.cat                               \
+    #     -no-emul-boot -boot-load-size 4 -boot-info-table    \
+    #     -eltorito-alt-boot                                  \
+    #     -e boot/limine-efi.bin                              \
+    #     -no-emul-boot -isohybrid-gpt-basdat                 \
+    #     iso                                                 \
+    #     -o xenon.iso
+
+    # rm -rf iso
 
     stat xenon.iso > /dev/null
 

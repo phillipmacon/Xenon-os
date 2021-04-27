@@ -7,7 +7,7 @@ namespace cpu::paging {
         constexpr u32 pageSize2MiB = 0x200000;
         constexpr u8 pageShiftBits = 12;
 
-        constexpr addr kernelVma = 0xffffffff80000000;
+        constexpr addr kernelVma = 0xffffffff80200000;
     };
 
     struct PageTableEntry {

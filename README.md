@@ -23,7 +23,7 @@ Xenon aims to be a lightweight, secure, cross-architecture, monolithic kernel wr
 
 ## Building
 ### Linux
-To build Xenon, you will need to have `meson`, `ninja`, `grub2`, `xorriso`, and `clang` installed on your system.<br>
+To build Xenon, you will need to have `meson`, `ninja`, `xorriso`, and `clang` installed on your system.<br>
 Xenon can be built by running the `build.sh` script in the project root, resulting in a bootable ISO file in the `build` directory 
 
 Xenon can also be manually built by running

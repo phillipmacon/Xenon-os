@@ -2,6 +2,7 @@
 #include <cpu/paging.h>
 #include <print.h>
 #include <types.h>
+#include <stivale/stivale2.h>
 
 #include "mem/mem.h"
 #include "xenonlogo.binh"
@@ -15,12 +16,16 @@ void callConstructors()
         (*i)();
 }
 
-extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
+// extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
+extern "C" void kmain(stivale2_struct* boot_info)
 {
-    if(multiboot_magic != 0x36d76289) {
-        printk("Multiboot magic invalid! Halting.\n");
-        while(1) { __asm("hlt"); }
-    }
+    // if(multiboot_magic != 0x36d76289) {
+    //     printk("Multiboot magic invalid! Halting.\n");
+    //     while(1) { __asm("hlt"); }
+    // }
+    
+    printk("Bootloader brand string: %s\n", boot_info->bootloader_brand);
+    printk("Bootloader version string: %s\n", boot_info->bootloader_version);
 
     printk("Initialising kernel\n");
     
@@ -28,87 +33,55 @@ extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
 
     cpu::info::printProcessorInfo();
 
-    // Find the framebuffer tag
-    u32* mb = (u32*)multiboot_structure;
-    mb += 2;
+    u32* fb{};
+    u32 fbWidth{}, fbHeight{};
 
-    struct MemMapEntry {
-        u64 base_addr;
-        u64 size;
-        u32 type;
-        u32 reserved;
-    }* memory_map;
-    u32 memory_map_length{};
+    size_t memsize{}, memsize_usable{};
 
-    addr fbAddr{};
-    u32 fbWidth, fbHeight, fbPitch;
-    u32 type = *(u32*)mb;
-    while(type != 0) {
-        // printk("Found tag: 0x%x\n", type);
+    // TODO: Move this to arch (or arch-shared for aarch64)
+    stivale2_tag* tag = (stivale2_tag*)boot_info->tags;
+    int i = 0;
+    while(tag) {
+        switch(tag->identifier) {
+        case STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID: {
+            printk("Found framebuffer tag\n");
+            stivale2_struct_tag_framebuffer* fbtag = reinterpret_cast<stivale2_struct_tag_framebuffer*>(tag);
+            fb = (u32*)fbtag->framebuffer_addr;
+            fbWidth = fbtag->framebuffer_width;
+            fbHeight = fbtag->framebuffer_height;
 
-        // Memory Map
-        if(type == 6) {
-            u32* mbSave = mb;
-            if(mbSave[3] != 0) {
-                printk("Memory map has an unsupported entry version!\n");
-                while(1) { __asm("hlt"); }
+            printk("FB addr: 0x%x\n", fbtag->framebuffer_addr);
+            break;
+        }
+        case STIVALE2_STRUCT_TAG_MEMMAP_ID: {
+            printk("Found memory map\n");
+            stivale2_struct_tag_memmap* memmaptag = reinterpret_cast<stivale2_struct_tag_memmap*>(tag);
+            stivale2_mmap_entry* memmap = memmaptag->memmap;
+            for(u64 i = 0; i < memmaptag->entries; i++) {
+                printk("\tMemmap #%i: Base 0x%x Size 0x%x Type 0x%x\n", i, memmap[i].base, memmap[i].length, memmap[i].type);
+                memsize += memmap[i].length;
+                if(memmap[i].type == STIVALE2_MMAP_USABLE)
+                    memsize_usable += memmap[i].length;
             }
-
-            memory_map = reinterpret_cast<MemMapEntry*>(&mbSave[4]);
-            memory_map_length = (mbSave[1] - 16) / sizeof(MemMapEntry);
-            printk("Found memory map, %i entries\n", memory_map_length);
+            break;
+        }
+        // case STIVALE2_STRUCT_TAG_RSDP_ID: {
+        //     stivale2_struct_tag_rsdp* rsdptag = reinterpret_cast<stivale2_struct_tag_rsdp*>(tag);
+        //     printk("RSDP @ 0x%x\n", rsdptag->rsdp);
+        //     break;
+        // }
         }
 
-        // Framebuffer
-        if(type == 8) {
-            u32* mbSave = mb + 2;
-            fbAddr = *(u64*)mbSave;
-            fbPitch = mbSave[2];
-            fbWidth = mbSave[3];
-            fbHeight = mbSave[4];
-
-            printk("Found fbaddr 0x%x\n", fbAddr);
-        }
-
-        u32 mbTagSize = *(mb + 1);
-        mbTagSize = (mbTagSize + (8 - 1)) & -8;
-        mb = (u32*)((addr)mb + mbTagSize);
-
-        type = *mb;
+        tag = (stivale2_tag*)tag->next;
+        ++i;
     }
 
-    if(memory_map == nullptr || memory_map_length == 0) {
-        printk("Memory map not found! Halting.\n");
-        while(1) { __asm("hlt"); }
-    }
+    printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
+    printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
 
-    if(fbAddr == 0) {
-        printk("Framebuffer not found! Halting.\n");
-        while(1) { __asm("hlt"); }  
-    }
-
-    size_t memory_size{}, memory_size_available{};
-    for(u32 i = 0; i < memory_map_length; i++) {
-        MemMapEntry e = memory_map[i];
-        const static char* map_types[] = {"Reserved", "Available", "Reserved", "ACPI", "PreserveOnHibernate"};
-        printk("MM Entry #%i - Base: 0x%x Size: 0x%x (%iKB) Type: %s\n", i, e.base_addr, e.size, util::bytesToKb(e.size), map_types[e.type]);
-
-        if(e.type == 1)
-            memory_size_available += e.size;
-
-        memory_size += e.size;
-    }
-
-    mem::physmem::initialise(memory_size);
-    mem::virtmem::initialise();
-
-    printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memory_size)+1, util::bytesToMb(memory_size_available)+1);
-    printk("%iKB for bitmap\n", util::bytesToKb(memory_size / 4096 / 8)+1);
-
-    // Called "Crap" for a reason
-    addr fbVAddr = cpu::paging::mapPagesCrap(fbAddr, fbHeight * fbPitch, 0, 0, 1, 0);
-    u32* fb = (u32*)fbVAddr;
-
+    // mem::physmem::initialise(memsize);
+    // mem::virtmem::initialise();
+    
     u32 midX = fbWidth / 2, midY = fbHeight / 2;
     u32 midLogo = (midY - 190) * fbWidth + (midX - 190);
 
