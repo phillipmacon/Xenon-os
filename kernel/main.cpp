@@ -3,6 +3,7 @@
 #include <print.h>
 #include <types.h>
 #include <stivale/stivale2.h>
+#include <array.h>
 
 #include "mem/mem.h"
 #include "xenonlogo.binh"
@@ -16,20 +17,14 @@ void callConstructors()
         (*i)();
 }
 
-// extern "C" void kmain(void* multiboot_structure, u32 multiboot_magic)
 extern "C" void kmain(stivale2_struct* boot_info)
 {
-    // if(multiboot_magic != 0x36d76289) {
-    //     printk("Multiboot magic invalid! Halting.\n");
-    //     while(1) { __asm("hlt"); }
-    // }
-    
     printk("Bootloader brand string: %s\n", boot_info->bootloader_brand);
     printk("Bootloader version string: %s\n", boot_info->bootloader_version);
 
     printk("Initialising kernel\n");
     
-    callConstructors();
+    // callConstructors();
 
     cpu::info::printProcessorInfo();
 
@@ -40,7 +35,7 @@ extern "C" void kmain(stivale2_struct* boot_info)
 
     // TODO: Move this to arch (or arch-shared for aarch64)
     stivale2_tag* tag = (stivale2_tag*)boot_info->tags;
-    int i = 0;
+    util::Array<stivale2_mmap_entry> memmap;
     while(tag) {
         switch(tag->identifier) {
         case STIVALE2_STRUCT_TAG_FRAMEBUFFER_ID: {
@@ -56,31 +51,30 @@ extern "C" void kmain(stivale2_struct* boot_info)
         case STIVALE2_STRUCT_TAG_MEMMAP_ID: {
             printk("Found memory map\n");
             stivale2_struct_tag_memmap* memmaptag = reinterpret_cast<stivale2_struct_tag_memmap*>(tag);
-            stivale2_mmap_entry* memmap = memmaptag->memmap;
-            for(u64 i = 0; i < memmaptag->entries; i++) {
-                printk("\tMemmap #%i: Base 0x%x Size 0x%x Type 0x%x\n", i, memmap[i].base, memmap[i].length, memmap[i].type);
-                memsize += memmap[i].length;
-                if(memmap[i].type == STIVALE2_MMAP_USABLE)
-                    memsize_usable += memmap[i].length;
+
+            int i = 0;
+            memmap = util::Array<stivale2_mmap_entry>(memmaptag->memmap, memmaptag->entries);
+            
+            for(const auto& region : memmap) {
+                printk("\tMemmap #%i: Base 0x%x Size 0x%x Type 0x%x\n", i++, region.base, region.length, region.type);
+                memsize += region.length;
+                if(region.type == STIVALE2_MMAP_USABLE)
+                    memsize_usable += region.length;
             }
             break;
         }
-        // case STIVALE2_STRUCT_TAG_RSDP_ID: {
-        //     stivale2_struct_tag_rsdp* rsdptag = reinterpret_cast<stivale2_struct_tag_rsdp*>(tag);
-        //     printk("RSDP @ 0x%x\n", rsdptag->rsdp);
-        //     break;
-        // }
         }
 
         tag = (stivale2_tag*)tag->next;
-        ++i;
     }
 
     printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
     printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
 
-    // mem::physmem::initialise(memsize);
+    mem::physmem::initialise(memmap, memsize);
     // mem::virtmem::initialise();
+
+    util::memset(fb, 0x00, fbWidth * fbHeight * 4);
     
     u32 midX = fbWidth / 2, midY = fbHeight / 2;
     u32 midLogo = (midY - 190) * fbWidth + (midX - 190);

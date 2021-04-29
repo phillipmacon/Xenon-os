@@ -24,8 +24,8 @@ namespace util {
         data_size = size;
     }
 
-    void Bitmap::clear() {
-        memset(bits, 0, data_size * 8);
+    void Bitmap::clear(bool zero) {
+        memset(bits, zero ? 0x00 : 0xff, data_size * 8);
     }
 
     size_t Bitmap::getBlock(size_t count) {
@@ -64,17 +64,45 @@ namespace util {
 extern addr _start;
 extern addr _end;
 
-static util::Bitmap bitmap(&_end, 0);
+static util::Bitmap bitmap;
+
+// TODO: Don't use macros, replace this with an inline function
+#define PAGECOUNT(length) ((length / mem::constants::pageSize) + ((length % mem::constants::pageSize) > 0 ? 1 : 0))
 
 namespace mem::physmem {
-    void initialise(u64 memsize) {
-        cpu::paging::initialisePageTable();
-        
-        bitmap.resize(memsize / constants::pageSize / 64 + 1);
-        bitmap.clear();
+    void free(addr base, size_t length) {
+        // printk("Free-ing %i pages @ 0x%x\n", PAGECOUNT(length), base);
+        bitmap.set(base / constants::pageSize, PAGECOUNT(length));
+    }
 
-        // bitmap.set(0, 512 * 3);
-        printk("Bitmap size in u64s: %i\n", memsize / constants::pageSize / 64 + 1);
+    void initialise(util::Array<stivale2_mmap_entry>& mmap, u64 memSize) {
+        void* bitmapPtr{};
+        for(const auto& region : mmap) {
+            if(region.length >= util::kbToBytes(64) && region.type == STIVALE2_MMAP_USABLE && !bitmapPtr) {
+                bitmapPtr = (void*)(region.base + mem::constants::kernelBase);
+                printk("Found space for bitmap @ 0x%x, putting it there (0x%x)\n", region.base, bitmapPtr);
+            }
+        }
+
+
+        if(!bitmapPtr) {
+            // panic("Could not find space for bitmap!");
+            printk("Could not find space for bitmap!\n");
+            return;
+        }
+
+        bitmap = util::Bitmap(reinterpret_cast<u64*>(bitmapPtr), memSize / constants::pageSize / 64 + 1);
+        
+        // Set all memory as used
+        bitmap.clear(false);
+
+        printk("Bitmap size in u64s: %i\n", memSize / constants::pageSize / 64 + 1);
+
+        // Unset regions that are available
+        for(const auto& region : mmap) {
+            if(region.type == STIVALE2_MMAP_USABLE)
+                free(region.base, region.length);
+        }
     }
 
     static void* alloc(size_t pages) {

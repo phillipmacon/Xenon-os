@@ -1,5 +1,7 @@
 #pragma once
+#include <array.h>
 #include <types.h>
+#include <stivale/stivale2.h>
 
 namespace util {
     class Bitmap {
@@ -8,6 +10,7 @@ namespace util {
         size_t data_size;
 
     public:
+        Bitmap() : bits(nullptr), data_size(0) {}
         // Size is in amount of u64's
         Bitmap(u64* data, size_t size) : bits(data), data_size(size) {}
 
@@ -17,7 +20,7 @@ namespace util {
         u8 get(size_t index);
 
         void resize(size_t size);
-        void clear();
+        void clear(bool zero=false);
 
         size_t getBlock(size_t count);
 
@@ -59,13 +62,13 @@ namespace util {
 namespace mem::constants {
     constexpr u32 pageSize = 0x1000;
     constexpr u32 pageSize2MiB = 0x200000;
-    constexpr u8 pageShiftBits = 12;
 
+    constexpr addr kernelBase = 0xffff800000000000;
     constexpr addr kernelVma = 0xffffffff80200000;
 }
 
 namespace mem::physmem {
-    void initialise(u64 memSize);
+    void initialise(util::Array<stivale2_mmap_entry>& mmap, u64 memSize);
 }
 
 namespace mem::virtmem {
