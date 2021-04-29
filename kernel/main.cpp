@@ -17,6 +17,27 @@ void callConstructors()
         (*i)();
 }
 
+u32 hueTable[] = {
+    0xff0000,
+    0xff5f00,
+    0xffbf00,
+    0xdfff00,
+    0x7fff00,
+    0x1fff00,
+    0x00ff3f,
+    0x00ff9f,
+    0x00ffff,
+    0x009fff,
+    0x003fff,
+    0x1f00ff,
+    0x7f00ff,
+    0xdf00ff,
+    0xff00bf,
+    0xff005f,
+};
+
+u32 fbBack[1024 * 768];
+
 extern "C" void kmain(stivale2_struct* boot_info)
 {
     printk("Bootloader brand string: %s\n", boot_info->bootloader_brand);
@@ -79,11 +100,25 @@ extern "C" void kmain(stivale2_struct* boot_info)
     u32 midX = fbWidth / 2, midY = fbHeight / 2;
     u32 midLogo = (midY - 190) * fbWidth + (midX - 190);
 
-    for(u32 y = 0; y < 380; y++) {
-        for(u32 x = 0; x < 380; x++) {
-            u8 p = _xenonLogo[y * 380 + x];
-            fb[midLogo + y * fbWidth + x] = (p << 16) | (p << 8) | p;
+    int fi = 0;
+    while(1) {
+        for(u32 y = 0; y < fbHeight; y++) {
+            for(u32 x = 0; x < fbWidth; x++) {
+                fbBack[y * fbWidth + x] = hueTable[fi];
+            }
         }
+
+        if(++fi >= 16)
+            fi = 0;
+
+        for(u32 y = 0; y < 380; y++) {
+            for(u32 x = 0; x < 380; x++) {
+                u8 p = _xenonLogo[y * 380 + x];
+                fbBack[midLogo + y * fbWidth + x] |= (p << 16) | (p << 8) | p;
+            }
+        }
+
+        util::memcpy(fb, fbBack, 1024 * 768 * sizeof(u32));
     }
 
     while(1) { __asm("hlt"); }
