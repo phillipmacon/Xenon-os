@@ -1,7 +1,21 @@
 GREEN='\033[1;32m'
 RED='\033[1;31m'
+YELLOW='\033[1;33m'
 WHITE='\033[1;37m'
 RESET='\033[0m'
+
+if [ ! -f "./external/stivale/stivale2.h" ]; then
+    echo -e "${YELLOW}Submodules don't seem to be downloaded${RESET}"
+    echo    "Downloading submodules..."
+
+    if [ ! -f "$(which git)" ]; then
+        echo -e "${RED}Failed to download submodules, git isn't installed!"
+        exit -1
+    fi
+
+    git submodule init
+    git submodule update
+fi
 
 meson build --cross-file=arch/x86_64.ini
 pushd build
