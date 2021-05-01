@@ -1,11 +1,12 @@
+#include <array.h>
 #include <cpu/cpuinfo.h>
 #include <cpu/interrupts.h>
 #include <cpu/gdt.h>
 #include <cpu/paging.h>
+#include <fb.h>
 #include <print.h>
-#include <types.h>
 #include <stivale/stivale2.h>
-#include <array.h>
+#include <types.h>
 
 #include "mem/mem.h"
 #include "xenonlogo.binh"
@@ -74,13 +75,8 @@ extern "C" void kmain(stivale2_struct* boot_info)
         tag = (stivale2_tag*)tag->next;
     }
 
-    printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
-    printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
-
-    mem::physmem::initialise(memmap, memsize);
-    // mem::virtmem::initialise();
-
     util::memset(fb, 0x00, fbWidth * fbHeight * 4);
+    video::fb::init(fb, fbWidth, fbHeight);
     
     u32 midX = fbWidth / 2, midY = fbHeight / 2;
     u32 midLogo = (midY - 190) * fbWidth + (midX - 190);
@@ -91,6 +87,12 @@ extern "C" void kmain(stivale2_struct* boot_info)
             fb[midLogo + y * fbWidth + x] = (p << 16) | (p << 8) | p;
         }
     }
+
+    printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
+    printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
+
+    mem::physmem::initialise(memmap, memsize);
+    // mem::virtmem::initialise();
 
     while(1) { __asm("hlt"); }
 }

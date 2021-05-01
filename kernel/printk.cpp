@@ -1,3 +1,4 @@
+#include <fb.h>
 #include <print.h>
 #include <starg.h>
 
@@ -59,11 +60,13 @@ char toLower(char c) {
     return c;
 }
 
-[[gnu::noinline]] void puts(const char* s) {
+void puts(const char* s) {
+    // video::fb::puts(s);
     while(*s) {
         putc(*s);
         s++;
 	}
+
 }
 
 [[gnu::noinline]] void putx(u64 x) {
