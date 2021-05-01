@@ -6,6 +6,7 @@ enum class LogLevel {
     Info,
     Warn,
     Error,
+    Abort,
     None
 };
 

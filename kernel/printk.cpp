@@ -97,6 +97,7 @@ void printklImpl(LogLevel level, const char* fmt, va_list args) {
         case LogLevel::Info:    puts("[info] "); break;
         case LogLevel::Warn:    puts("[WARN] "); break;
         case LogLevel::Error:   puts("[ERR] "); break;
+        case LogLevel::Abort:   puts("[ABORT] "); break;
         default: break;
     }
 

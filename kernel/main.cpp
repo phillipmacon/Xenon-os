@@ -1,4 +1,6 @@
 #include <cpu/cpuinfo.h>
+#include <cpu/interrupts.h>
+#include <cpu/gdt.h>
 #include <cpu/paging.h>
 #include <print.h>
 #include <types.h>
@@ -27,6 +29,10 @@ extern "C" void kmain(stivale2_struct* boot_info)
     // callConstructors();
 
     cpu::info::printProcessorInfo();
+
+    cpu::gdt::init();
+
+    cpu::interrupts::init();
 
     u32* fb{};
     u32 fbWidth{}, fbHeight{};

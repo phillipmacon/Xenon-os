@@ -4,7 +4,11 @@ arch_lib = static_library('arch',
         'io/putc.cpp',
 
         'mem/paging.cpp',
-        'mem/paging.h',
+
+        'interrupts.cpp',
+        'idt.S',
+        'gdt.cpp',
+        'gdt.S',
 
         'cpuinfo.cpp',
         'stivale.cpp',
