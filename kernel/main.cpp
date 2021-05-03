@@ -1,3 +1,4 @@
+#include <acpi.h>
 #include <array.h>
 #include <cpu/cpuinfo.h>
 #include <cpu/interrupts.h>
@@ -8,12 +9,9 @@
 #include <stivale/stivale2.h>
 #include <types.h>
 
-#include "acpi.h"
 #include "mem/mem.h"
 
-#ifdef DRAW_XENONLOGO
 #include "xenonlogo.binh"
-#endif
 
 typedef void (*constructor)();
 extern constructor __CTOR_LIST__;
@@ -87,30 +85,20 @@ extern "C" void kmain(stivale2_struct* boot_info)
 
     util::memset(fb, 0x00, fbWidth * fbHeight * 4);
     video::fb::init(fb, fbWidth, fbHeight);
-    
-#ifdef DRAW_XENONLOGO
-    u32 midX = fbWidth / 2, midY = fbHeight / 2;
-    u32 midLogo = (midY - 190) * fbWidth + (midX - 190);
-
-    for(u32 y = 0; y < 380; y++) {
-        for(u32 x = 0; x < 380; x++) {
-            u8 p = _xenonLogo[y * 380 + x];
-            fb[midLogo + y * fbWidth + x] = (p << 16) | (p << 8) | p;
-        }
-    }
-#endif
-
-    printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
-    printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
-
-    mem::physmem::initialise(memmap, memsize);
-    // mem::virtmem::initialise();
-
-    uefi::ACPI::instance().printTables();
 
     void* bgrt_ptr = uefi::ACPI::instance().getTable("BGRT");
     if(!bgrt_ptr) {
         printk("BGRT table not found\n");
+
+        u32 midX = fbWidth / 2, midY = fbHeight / 2;
+        u32 midLogo = (midY - 190) * fbWidth + (midX - 190);
+
+        for(u32 y = 0; y < 380; y++) {
+            for(u32 x = 0; x < 380; x++) {
+                u8 p = _xenonLogo[y * 380 + x];
+                fb[midLogo + y * fbWidth + x] = (p << 16) | (p << 8) | p;
+            }
+        }
     } else {
         printk("BGRT table found!\n");
         uefi::BGRT* bgrt = reinterpret_cast<uefi::BGRT*>(bgrt_ptr);
@@ -126,6 +114,14 @@ extern "C" void kmain(stivale2_struct* boot_info)
             }
         }
     }
+
+    uefi::ACPI::instance().printTables();
+
+    printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
+    printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
+
+    mem::physmem::initialise(memmap, memsize);
+    // mem::virtmem::initialise();
 
     while(1) { __asm("hlt"); }
 }
