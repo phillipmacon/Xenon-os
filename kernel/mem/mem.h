@@ -59,14 +59,6 @@ namespace util {
     inline u64 bytesToTb(u64 b) { return b >> 40; }
 }
 
-namespace mem::constants {
-    constexpr u32 pageSize = 0x1000;
-    constexpr u32 pageSize2MiB = 0x200000;
-
-    constexpr addr kernelBase = 0xffff800000000000;
-    constexpr addr kernelVma = 0xffffffff80200000;
-}
-
 namespace mem::physmem {
     void initialise(util::Array<stivale2_mmap_entry>& mmap, u64 memSize);
 }

@@ -8,8 +8,12 @@
 #include <stivale/stivale2.h>
 #include <types.h>
 
+#include "acpi.h"
 #include "mem/mem.h"
+
+#ifdef DRAW_XENONLOGO
 #include "xenonlogo.binh"
+#endif
 
 typedef void (*constructor)();
 extern constructor __CTOR_LIST__;
@@ -70,6 +74,12 @@ extern "C" void kmain(stivale2_struct* boot_info)
             }
             break;
         }
+        case STIVALE2_STRUCT_TAG_RSDP_ID: {
+            printk("Found RSDP\n");
+            stivale2_struct_tag_rsdp* rsdptag = reinterpret_cast<stivale2_struct_tag_rsdp*>(tag);
+            uefi::ACPI::instance().init(rsdptag->rsdp);
+            break;
+        }
         }
 
         tag = (stivale2_tag*)tag->next;
@@ -78,6 +88,7 @@ extern "C" void kmain(stivale2_struct* boot_info)
     util::memset(fb, 0x00, fbWidth * fbHeight * 4);
     video::fb::init(fb, fbWidth, fbHeight);
     
+#ifdef DRAW_XENONLOGO
     u32 midX = fbWidth / 2, midY = fbHeight / 2;
     u32 midLogo = (midY - 190) * fbWidth + (midX - 190);
 
@@ -87,12 +98,34 @@ extern "C" void kmain(stivale2_struct* boot_info)
             fb[midLogo + y * fbWidth + x] = (p << 16) | (p << 8) | p;
         }
     }
+#endif
 
     printk("%iMB memory detected, %iMB available\n", util::bytesToMb(memsize), util::bytesToMb(memsize_usable));
     printk("%iKB for bitmap\n", util::bytesToKb(memsize / 4096 / 8));
 
     mem::physmem::initialise(memmap, memsize);
     // mem::virtmem::initialise();
+
+    uefi::ACPI::instance().printTables();
+
+    void* bgrt_ptr = uefi::ACPI::instance().getTable("BGRT");
+    if(!bgrt_ptr) {
+        printk("BGRT table not found\n");
+    } else {
+        printk("BGRT table found!\n");
+        uefi::BGRT* bgrt = reinterpret_cast<uefi::BGRT*>(bgrt_ptr);
+        u8* img_ptr = reinterpret_cast<u8*>(bgrt->image_address + mem::constants::kernelBase);
+        BitmapHeader* bh = reinterpret_cast<BitmapHeader*>(img_ptr);
+        BitmapInfoHeader* bih = reinterpret_cast<BitmapInfoHeader*>(img_ptr + sizeof(BitmapHeader));
+        RGB24* img_data = reinterpret_cast<RGB24*>(img_ptr + bh->offset);
+
+        for(u32 y = 0; y < bih->image_height; y++) {
+            for(u32 x = 0; x < bih->image_width; x++) {
+                RGB24 pixel = img_data[(bih->image_height - y - 1) * bih->image_width + x];
+                fb[(bgrt->image_offset_y + y) * fbWidth + x + bgrt->image_offset_x] = pixel.r << 16 | pixel.g << 8 | pixel.b;
+            }
+        }
+    }
 
     while(1) { __asm("hlt"); }
 }

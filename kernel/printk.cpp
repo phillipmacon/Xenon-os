@@ -69,6 +69,11 @@ void puts(const char* s) {
 
 }
 
+void putn(const char* s, size_t n) {
+    for(size_t i = 0; i < n; i++)
+        putc(s[i]);
+}
+
 [[gnu::noinline]] void putx(u64 x) {
     char buf[17];
 
