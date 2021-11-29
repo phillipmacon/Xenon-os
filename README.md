@@ -15,7 +15,7 @@ Xenon aims to be a lightweight, secure, cross-architecture, monolithic kernel wr
 | Architecture |  Status   |
 |--------------|-----------|
 | x86_64       | Supported |
-| armv8        | Planned   |
+| aarch64      | Planned   |
 
 **Support for other architectures may be added in the future**
 
