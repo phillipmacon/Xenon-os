@@ -1,3 +1,8 @@
+[cohae]: <> (Change fat xenon banner to square/transparent logo?)
+
+<p align="center">
+	<img alt="Xenon logo" height="60%" width="60%" src="https://repository-images.githubusercontent.com/244417195/c2270680-69c6-11ea-85b3-e425e4d1df24">
+</p>
 <h1 align="center">Xenon</h1>
 
 <p align="center">
@@ -9,15 +14,13 @@
 	</a>
 </p>
 
-Xenon aims to be a lightweight, secure, cross-architecture, monolithic kernel written in C++
+Xenon aims to be a lightweight, secure, monolithic kernel written in C++
 
 ## Features
 | Architecture |  Status   |
 |--------------|-----------|
 | x86_64       | Supported |
 | aarch64      | Planned   |
-
-**Support for other architectures may be added in the future**
 
 <br>
 
@@ -31,16 +34,24 @@ Xenon can also be manually built by running
 meson build --cross-file=arch/x86_64.ini && cd build
 ninja
 ```
-Do note however that this only produces an ELF, not an ISO
+Note that this only produces an ELF file, not an ISO
 
 ### Windows
-Xenon can be built on Windows 10 by using WSL and following the <b>Linux</b> guide.
+Xenon can be built on Windows by using WSL and following the [Linux](#Linux) guide.
 
 <br>
 
 ## Running
 **Real hardware**<br>
 Xenon can be run on real hardware by burning the `xenon.iso` image file to a CD or a USB-stick using a tool like rufus on Windows, or the `dd` command on Unix systems
+
+```diff
+-- DISCLAIMER --
+We are not responsible for damage done to your hardware
+Xenon is in-dev software, and has not been widely tested on real hardware yet
+```
+
+[cohae]: <> (Add raspberry pi guide using UBoot)
 
 **QEMU**<br>
 Simply run the `run.sh` script, or execute `make qemu` in the `build` directory
