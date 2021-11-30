@@ -30,24 +30,6 @@ namespace util {
         size_t bitcount() { return data_size * 64; }
     };
 
-    // TODO: Keep these functions here, or move them to global scope?
-    inline void* memset(void* ptr, u8 value, size_t num) {
-        u8* p = (u8*)ptr;
-        for(size_t i = 0; i < num; i++)
-            p[i] = value;
-        
-        return ptr;
-    }
-
-    inline void* memcpy(void* dst, const void* src, size_t num) {
-        u8* d = (u8*)dst;
-        const u8* s = (u8*)src;
-        for(size_t i = 0; i < num; i++)
-            d[i] = s[i];
-
-        return dst;
-    }
-
     inline u64 kbToBytes(u64 kb) { return kb << 10; }
     inline u64 mbToBytes(u64 mb) { return mb << 20; }
     inline u64 gbToBytes(u64 gb) { return gb << 30; }

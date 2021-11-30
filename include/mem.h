@@ -2,8 +2,23 @@
 #include <types.h>
 
 namespace util {
-    inline void* memset(void* ptr, u8 value, size_t num);
-    inline void* memcpy(void* dst, const void* src, size_t num);
+    // TODO: Move these to a source file?
+    inline void* memset(void* ptr, u8 value, size_t num) {
+        u8* p = (u8*)ptr;
+        for(size_t i = 0; i < num; i++)
+            p[i] = value;
+
+        return ptr;
+    }
+
+    inline void* memcpy(void* dst, const void* src, size_t num) {
+        u8* d = (u8*)dst;
+        const u8* s = (u8*)src;
+        for(size_t i = 0; i < num; i++)
+            d[i] = s[i];
+
+        return dst;
+    }
 }
 
 namespace mem::constants {

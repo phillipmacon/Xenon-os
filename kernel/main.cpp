@@ -13,6 +13,7 @@
 
 #include "xenonlogo.binh"
 
+// TODO: Move
 typedef void (*constructor)();
 extern constructor __CTOR_LIST__;
 extern constructor __CTOR_END__;

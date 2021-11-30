@@ -1,4 +1,5 @@
 #include <cpu/paging.h>
+#include <mem.h>
 #include <print.h>
 #include "mem.h"
 
@@ -31,7 +32,7 @@ namespace util {
     size_t Bitmap::getBlock(size_t count) {
        size_t count2 = count;
 
-        for(int i = 0; i < bitcount(); i++) {
+        for(size_t i = 0; i < bitcount(); i++) {
             if(get(i) == 0) {
                 if(--count2 == 0) {
                     return i - count;
@@ -108,7 +109,7 @@ namespace mem::physmem {
     static void* alloc(size_t pages) {
         // TODO: Spinlocks
         size_t page_base = bitmap.getBlock(pages);
-        if(page_base == -1) {
+        if(page_base == -1ULL) {
             // TODO: Panic instead of potentially letting the kernel collapse
             return nullptr;
         }

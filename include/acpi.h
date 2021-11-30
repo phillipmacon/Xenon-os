@@ -36,7 +36,7 @@ namespace uefi {
         u32     oem_revision;
         u32     creator_id;
         u32     creator_revision;
-        u32     entries[];
+        u32*    entries;
     };
 
     struct [[gnu::packed]] RSDP {

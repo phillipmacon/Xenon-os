@@ -8,9 +8,10 @@ namespace util {
         T* data;
         size_t length;
     public:
-        Array() : length(0), data(nullptr) {}
-        Array(T* _data, size_t _length) : length(_length), data(_data) {}
+        Array() : data(nullptr), length(0) {}
+        Array(T* _data, size_t _length) : data(_data), length(_length) {}
         
+        // TODO: Use optionals to prevent NPD?
         T& operator[](size_t idx) { return data[idx]; }
 
         T* begin() { return data; }

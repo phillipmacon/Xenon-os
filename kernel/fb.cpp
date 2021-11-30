@@ -35,7 +35,7 @@ namespace video::fb {
             return;
         }
 
-        const u8* character = xenonfont[xenonfont_conversiontable[c]];
+        const u8* character = xenonfont[xenonfont_conversiontable[u8(c)]];
         u16 x = char_x * 8, y = char_y * 16;
 
         for(u8 i = 0; i < 16; i++)
