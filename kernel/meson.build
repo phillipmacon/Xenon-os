@@ -3,7 +3,6 @@ kernel_sources += files(
     'mem/pmm.cpp',
     'mem/vmm.cpp',
 
-    'acpi.cpp',
     'main.cpp',
     'fb.cpp',
     'printk.cpp',
