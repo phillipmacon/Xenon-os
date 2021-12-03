@@ -11,7 +11,6 @@ arch_lib = static_library('arch',
         'gdt.S',
 
         'cpuinfo.cpp',
-        'stivale.cpp',
     ),
     include_directories: inc
 )
