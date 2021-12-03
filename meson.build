@@ -23,7 +23,7 @@ add_project_arguments([
         '-mno-red-zone',
         '-fuse-cxa-atexit',
         '-fno-threadsafe-statics',
-        '-mcmodel=kernel',
+        '-mcmodel=large',
     ],
     language: 'cpp'
 )
