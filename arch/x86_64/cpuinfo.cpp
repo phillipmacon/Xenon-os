@@ -16,12 +16,12 @@ namespace cpu::info {
     void getProcessorVendor(char* dst) {
         u32 eax;
         _cpuid(0x00000000, &eax, (u32*)dst + 0, (u32*)dst + 2,  (u32*)dst + 1);
-        dst[18] = '\0';
+        dst[12] = '\0';
     }
 
     void printProcessorInfo() {
         char processorModel[49];
-        char processorVendor[19];
+        char processorVendor[13];
         getProcessorModel(processorModel);
         getProcessorVendor(processorVendor);
 
