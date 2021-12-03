@@ -5,6 +5,7 @@ arch_lib = static_library('arch',
 
         'mem/paging.cpp',
 
+        'cpu.cpp',
         'interrupts.cpp',
         'idt.S',
         'gdt.cpp',

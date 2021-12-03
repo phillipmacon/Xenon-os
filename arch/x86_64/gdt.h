@@ -16,3 +16,7 @@ struct GDTR {
     u16 limit;
     u64 offset;
 } __attribute((packed));
+
+namespace cpu::gdt {
+    void init();
+}

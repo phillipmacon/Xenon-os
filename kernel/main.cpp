@@ -1,8 +1,5 @@
 #include <array.h>
-#include <cpu/cpuinfo.h>
-#include <cpu/interrupts.h>
-#include <cpu/gdt.h>
-#include <cpu/paging.h>
+#include <cpu/cpu.h>
 #include <fb.h>
 #include <mem.h>
 #include <print.h>
@@ -23,6 +20,9 @@ void callConstructors()
         (*i)();
 }
 
+// TODO: kmain is not supposed to handle anything platform-specific.
+// For example, calibrating the cpu clock, setting the IDT and GDT should be handled by a single cpu::init function
+// We're gonna have to change the code flow so that any bootloader/cpu initialisation happens before kmain
 extern "C" void kmain(stivale2_struct* boot_info)
 {
     printk("Bootloader brand string: %s\n", boot_info->bootloader_brand);
@@ -30,13 +30,9 @@ extern "C" void kmain(stivale2_struct* boot_info)
 
     printk("Initialising kernel\n");
     
-    // callConstructors();
+    callConstructors();
 
-    cpu::info::printProcessorInfo();
-
-    cpu::gdt::init();
-
-    cpu::interrupts::init();
+    cpu::init();    
 
     u32* fb{};
     u32 fbWidth{}, fbHeight{};
@@ -97,5 +93,5 @@ extern "C" void kmain(stivale2_struct* boot_info)
     mem::physmem::initialise(memmap, memsize);
     // mem::virtmem::initialise();
 
-    while(1) { __asm("hlt"); }
+    while(1) { }
 }

@@ -1,5 +1,5 @@
 #pragma once
 
-namespace cpu::gdt {
+namespace cpu {
     void init();
 }

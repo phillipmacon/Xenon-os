@@ -25,6 +25,7 @@ namespace cpu::info {
         getProcessorModel(processorModel);
         getProcessorVendor(processorVendor);
 
+        // TODO: Module names in printk
         printk("[ cpu::info ] CPU Vendor: %s\n", processorVendor);
         printk("[ cpu::info ] CPU Model: %s\n", processorModel);
     }

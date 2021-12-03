@@ -171,6 +171,7 @@ void printklImpl(LogLevel level, const char* fmt, va_list args) {
 	}
 }
 
+// TODO: Rework the logging system to be less unix-y and more versatile
 void printkl(LogLevel level, const char* fmt, ...) {
     va_list args;
 
