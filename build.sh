@@ -44,26 +44,16 @@ pushd build
 TIMEOUT=5
 PROTOCOL=stivale2
 KERNEL_PATH=boot:///boot/xenon.elf
+
+GRAPHICS=yes
+THEME_BACKGROUND=13001d
+THEME_FOREGROUND=ffffff
 EOL
 
     xorriso -as mkisofs -b boot/limine-cd.bin \
             -no-emul-boot -boot-load-size 4 -boot-info-table \
             -eltorito-alt-boot -e boot/limine-efi.bin \
             -no-emul-boot iso_master -o xenon.iso
-
-    # xorriso -as mkisofs                                     \
-    #     -J -joliet-long                                     \
-    #     -rock                                               \
-    #     -b boot/limine-cd.bin                               \
-    #     -c boot/limine-cd.cat                               \
-    #     -no-emul-boot -boot-load-size 4 -boot-info-table    \
-    #     -eltorito-alt-boot                                  \
-    #     -e boot/limine-efi.bin                              \
-    #     -no-emul-boot -isohybrid-gpt-basdat                 \
-    #     iso                                                 \
-    #     -o xenon.iso
-
-    # rm -rf iso
 
     stat xenon.iso > /dev/null
 
