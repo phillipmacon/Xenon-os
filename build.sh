@@ -41,7 +41,7 @@ pushd build
 
     cat >iso_master/boot/limine.cfg <<EOL
 :xenon
-TIMEOUT=5
+TIMEOUT=0
 PROTOCOL=stivale2
 KERNEL_PATH=boot:///boot/xenon.elf
 
